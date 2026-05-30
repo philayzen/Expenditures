@@ -1,0 +1,140 @@
+{% extends "index.html" %}
+{% block reweContent %}
+        <!-- Controls row -->
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            <div class="toggle-group" role="group" aria-label="Group by" id="rewe-mode">
+                <button class="active" id="rewe_group_individual" aria-pressed="true"  onclick="activate(this, 'rewe')">Individual</button>
+                <button              id="rewe_group_name"       aria-pressed="false" onclick="activate(this, 'rewe')">By Name</button>
+            </div>
+            <div class="flex gap-2" id="rewe-edit-categories-div">
+                <button class="btn-ghost" id="rewe-edit-categories" onclick="editCategories(this)">Edit Categories</button>
+                <button class="btn-ghost" id="rewe-save-categories" onclick="saveCategories(this)"  style="display:none">Save</button>
+                <button class="btn-ghost" id="rewe-cancel-categories" onclick="cancelEditCategories(this)" style="display:none">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Two-column layout: table + chart -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+            <!-- Expenditures table -->
+            <div class="card card-table">
+                <div class="px-5 py-4 border-b border-[#e2d5c0] flex items-center justify-between">
+                    <span style="font-size:0.8rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#5a7f5b;">Expenditures </span>
+                    <input style="align-self: right;" id="rewe-search" type="text" placeholder="Search..." class="bg-transparent border-b border-[#e2d5c0] focus:outline-none focus:ring-0" />
+                </div>
+                <div class="table-scroll">
+                    <table class="data-table" id="rewe-expenditures-table">
+                        <thead>
+                            <tr>
+                                <!-- <th data-col="date" style="text-align: center;">Date ↕</th> -->
+                                <th data-col="date" style="text-align: center;">Date</th>
+                                <th data-col="name" style="text-align: center;">Name</th>
+                                <th data-col="amount" style="text-align: center;">Amount</th>
+                                <th data-col="price" style="text-align: center;">Price</th>
+                                <th data-col="category" style="text-align: center;">Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Category chart -->
+            <div class="card">
+                <div class="px-5 py-4 border-b border-[#e2d5c0]">
+                    <span id="rewe_category" style="font-size:0.8rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#5a7f5b;">Spending by Category</span>
+                </div>
+                <div class="p-5">
+                    <div class="chart-area">
+                        <canvas id="reweCategoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Time bar chart -->
+        <div class="card">
+            <div class="px-5 py-4 border-b border-[#e2d5c0]">
+                <span style="font-size:0.8rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#5a7f5b;">Spending Over Time</span>
+            </div>
+            <div class="p-5">
+                <div id="reweTimeChartLegend" class="bar-legend-grid"></div>
+                <canvas id="reweTimeChart"></canvas>
+            </div>
+        </div>
+{% endblock %}
+
+
+
+{% block bankContent %}
+        <!-- Controls row -->
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            <div class="toggle-group" role="group" aria-label="Group by" id="bank-mode">
+                <button class="active" id="bank_group_individual" aria-pressed="true"  onclick="activate(this, 'bank')" >Individual</button>
+                <button              id="bank_group_name"       aria-pressed="false" onclick="activate(this, 'bank')">By Name</button>
+            </div>
+            <div class="flex gap-2 flex-wrap items-center">
+                <button class="btn-ghost" onclick="openTypeManager()">Manage Types</button>
+                <div class="flex gap-2" id="bank-edit-categories-div">
+                    <button class="btn-ghost" id="bank-edit-categories" onclick="editCategories(this)">Edit Categories</button>
+                    <button class="btn-ghost" id="bank-save-categories" onclick="saveCategories(this)"  style="display:none">Save</button>
+                    <button class="btn-ghost" id="bank-cancel-categories" onclick="cancelEditCategories(this)" style="display:none">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two-column layout: table + chart -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+            <!-- Expenditures table -->
+            <div class="card card-table">
+                <div class="px-5 py-4 border-b border-[#e2d5c0] flex items-center justify-between">
+                    <span style="font-size:0.8rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#5a7f5b;">Expenditures </span>
+                    <input style="align-self: right;" id="bank-search" type="text" placeholder="Search..." class="bg-transparent border-b border-[#e2d5c0] focus:outline-none focus:ring-0" />
+                </div>
+                <div class="table-scroll">
+                    <table class="data-table" id="bank-expenditures-table">
+                        <thead>
+                            <tr>
+                                <th data-col="date"      style="text-align: center;">Date</th>
+                                <th data-col="source"    style="text-align: center;">Bank</th>
+                                <th data-col="recipient" style="text-align: center;">Recipient</th>
+                                <th data-col="price"     style="text-align: center;">Price</th>
+                                <th data-col="category"  style="text-align: center;">Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Category chart -->
+            <div class="card">
+                <div class="px-5 py-4 border-b border-[#e2d5c0]">
+                    <span id="bank_category" style="font-size:0.8rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#5a7f5b;">Spending by Category</span>
+                </div>
+                <div class="p-5">
+                    <div class="chart-area">
+                        <canvas id="bankCategoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time bar chart -->
+        <div class="card">
+            <div class="px-5 py-4 border-b border-[#e2d5c0]">
+                <span style="font-size:0.8rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#5a7f5b;">Spending Over Time</span>
+            </div>
+            <div class="p-5">
+                <div id="bankTimeChartLegend" class="bar-legend-grid"></div>
+                <canvas id="bankTimeChart"></canvas>
+            </div>
+        </div>
+{% endblock %}
+

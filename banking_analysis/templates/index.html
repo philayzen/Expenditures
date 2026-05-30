@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My App</title>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+    <script src="{{ url_for('static', filename='vendor/chart.umd.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/js.js') }}"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+<!-- 
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        moss:    { DEFAULT: '#3d5a3e', light: '#5a7f5b', dark: '#2a3e2b' },
+                        cream:   { DEFAULT: '#f5f0e8', warm: '#ede5d5' },
+                        sand:    { DEFAULT: '#c9b99a', light: '#e2d5c0' },
+                        charcoal:{ DEFAULT: '#1e2420' },
+                    },
+                    fontFamily: {
+                        display: ['Sora', 'sans-serif'],
+                        mono:    ['DM Mono', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script> -->
+
+</head>
+<body>
+    <template id="type-manager-tmpl">
+        <p style="font-weight:600;margin-bottom:1rem;text-align:left;">Category Types</p>
+        <div style="max-height:60vh;overflow-y:auto;">
+            <table id="type-manager-table" style="width:100%;border-collapse:collapse;">
+                <thead>
+                    <tr class="type-manager-row">
+                        <th>Category</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div style="margin-top:1rem;display:flex;justify-content:flex-end;">
+            <button class="btn-primary" onclick="saveTypeAssignments()">Save</button>
+        </div>
+    </template>
+
+    <div id="overlay-box" style="display: none;">
+        <div id="overlay-popup">
+    <button id="popup-close-btn" onclick="close_popup()" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.5"
+             stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+    </button>
+    <div id="popup-content"></div>
+</div>
+    </div>
+    <!-- Header -->
+    <header>
+        <span class="dot"></span>
+        <h1>Expenditure tracker</h1>
+    </header>
+    
+        <!-- Shared date filter -->
+        <div class="date-row">
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+                <label for="since">Since</label>
+                <input type="date" id="since" name="since">
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+                <label for="until">Until</label>
+                <input type="date" id="until" name="until">
+            </div>
+            <button class="btn-primary" onclick="update_refresh()">Fetch Expenditures</button>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <button class="btn-ghost" onclick="setDateRange('prev-month')">Previous Month</button>
+                <button class="btn-ghost" onclick="setDateRange('this-year')">This Year</button>
+                <button class="btn-ghost" onclick="setDateRange('prev-year')">Previous Year</button>
+                <button class="btn-ghost" onclick="setDateRange('last-365')">Last 365 Days</button>
+            </div>
+        </div>
+    <nav class="flex justify-center bg-sand rounded-lg p-1 mb-6 shadow-sm">
+        <button class="tab w-2/5 py-3 rounded-md font-semibold text-charcoal bg-transparent hover:bg-green-700 transition-all duration-200" id="bank-tab" onclick="showContent('bank')">Banks</button>
+        <button class="tab w-2/5 py-3 rounded-md font-semibold text-charcoal bg-transparent hover:bg-green-700 transition-all duration-200" id="rewe-tab" onclick="showContent('rewe')">Rewe</button>
+    </nav>
+    <main class="max-w-screen-xl mx-auto px-6 py-8 space-y-6">
+        <div id="reweContent" name="Content" style="display: block;">
+            {% block reweContent %}{% endblock %}
+        </div>
+        <div id="bankContent" name="Content" style="display: none;">
+            {% block bankContent %}{% endblock %}
+        </div>
+    </main>
+
+
+
+</body>
+</html>

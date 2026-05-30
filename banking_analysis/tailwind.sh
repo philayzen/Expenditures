@@ -1,0 +1,1 @@
+npx @tailwindcss/cli -i ./static/css/tailwind/input.css -o ./static/css/output.css

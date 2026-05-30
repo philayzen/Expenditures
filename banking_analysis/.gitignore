@@ -1,0 +1,11 @@
+REWE/*
+DKB/*
+ING/*
+VB/*
+*.db
+**/.vscode
+**/__pycache__
+**/config.py
+.claude
+package*.json
+node_modules

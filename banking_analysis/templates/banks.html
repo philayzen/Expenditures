@@ -1,0 +1,79 @@
+{% extends "index.html" %}
+{% block bankContent %}
+<!-- Date filter row -->
+        <div class="date-row">
+            <label for="rewe_since">Since</label>
+            <input type="date" id="rewe_since" name="rewe_since">
+            <label for="rewe_until">Until</label>
+            <input type="date" id="rewe_until" name="rewe_until">
+            <button class="btn-primary" onclick="refresh_tables()">Fetch Expenditures</button>
+        </div>
+
+        <!-- Controls row -->
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            <div class="toggle-group" role="group" aria-label="Group by" id="rewe-mode">
+                <button class="active" id="rewe_group_individual" aria-pressed="true"  onclick="activate(this)">Individual</button>
+                <button              id="rewe_group_name"       aria-pressed="false" onclick="activate(this)">By Name</button>
+            </div>
+            <div class="flex gap-2" id="rewe-edit-categories-div">
+                <button class="btn-ghost" id="rewe-edit-categories" onclick="editCategories()">Edit Categories</button>
+                <button class="btn-ghost" id="rewe-save-categories" onclick="saveCategories()"  style="display:none">Save</button>
+                <button class="btn-ghost" id="rewe-cancel-categories" onclick="cancelEditCategories()" style="display:none">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Two-column layout: table + chart -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+            <!-- Expenditures table -->
+            <div class="card">
+                <div class="px-5 py-4 border-b border-[#e2d5c0] flex items-center justify-between">
+                    <span style="font-size:0.8rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#5a7f5b;">Expenditures </span>
+                    <input style="align-self: right;" id="rewe-search" type="text" placeholder="Search..." class="bg-transparent border-b border-[#e2d5c0] focus:outline-none focus:ring-0" />
+                </div>
+                <div class="table-scroll">
+                    <table class="data-table" id="rewe-expenditures-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Amount</th>
+                                <th>Price</th>
+                                <th>Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-scroll">
+                    <table class="data-table" id="rewe-expenditures-edit-table" style="display:none;">
+                        <thead>
+                            <tr>
+                                <!-- <th>Date</th> -->
+                                <th>Name</th>
+                                <th>Amount</th>
+                                <th>Price</th>
+                                <th>Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Category chart -->
+            <div class="card">
+                <div class="px-5 py-4 border-b border-[#e2d5c0]">
+                    <span style="font-size:0.8rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:#5a7f5b;">Spending by Category</span>
+                </div>
+                <div class="p-5">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+{% endblock %}

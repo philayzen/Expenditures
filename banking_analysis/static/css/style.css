@@ -1,0 +1,371 @@
+/* ── Design tokens ── */
+:root {
+    --color-moss:        #3d5a3e;
+    --color-moss-light:  #5a7f5b;
+    --color-moss-mid:    #8aab8b;
+    --color-moss-dark:   #2a3e2b;
+    --color-cream:       #f5f0e8;
+    --color-warm:        #ede5d5;
+    --color-sand:        #c9b99a;
+    --color-sand-light:  #e2d5c0;
+    --color-charcoal:    #1e2420;
+    --color-amber:       #a07850;
+    --font-display:      'Sora', sans-serif;
+    --font-mono:         'DM Mono', monospace;
+}
+
+.rewe-group {
+  display: inline-flex;
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: 8px;
+  overflow: hidden; /* clips child borders into a pill group */
+}
+#overlay-box {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* semi-transparent dark backdrop */
+    z-index: 1000; /* sit above all other content */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#overlay-popup {
+    background-color: #fff;
+    width: fit-content;
+    min-width: 280px;
+    max-width: 90vw;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    position: relative;      /* needed to anchor the close button */
+    text-align: center;
+}
+
+#popup-close-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #555;
+    padding: 4px;
+    line-height: 1;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+}
+
+#popup-close-btn:hover {
+    color: #111;
+    background-color: rgba(0, 0, 0, 0.07);
+}
+
+#popup-content p {
+    margin: 0 0 1rem 0;
+    font-size: 0.9rem;
+    color: #444;
+}
+
+#popup-content input {
+    display: block;
+    margin: 0 auto 1rem auto;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#popup-content button {
+    padding: 0.5rem 1.5rem;
+    background-color: #2d5a27;   /* match your app's green */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#popup-content button:hover {
+    background-color: #3e7a36;
+}
+.rewe-group-btn {
+  padding: 6px 16px;
+  border: none;
+  border-right: 0.5px solid var(--color-border-secondary);
+  background: transparent;
+  cursor: pointer;
+  color: #555;
+}
+
+.rewe-group-btn:last-child { border-right: none; }
+
+.rewe-group-btn.active {
+  background: #111;
+  color: #fff;
+}
+
+body { background-color: #f5f0e8; color: #1e2420; font-family: 'Sora', sans-serif; }
+
+/* ── Header ── */
+header {
+    background: #1e2420;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 3px solid #3d5a3e;
+}
+header h1 {
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: -0.02em;
+    color: #f5f0e8;
+}
+header .dot { width: 10px; height: 10px; border-radius: 50%; background: #3d5a3e; }
+
+/* ── Date picker row ── */
+.date-row {
+    background: #ede5d5;
+    border: 1px solid #c9b99a;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+.date-row label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #5a7f5b;
+}
+.date-row input[type="date"] {
+    background: #f5f0e8;
+    border: 1.5px solid #c9b99a;
+    border-radius: 8px;
+    padding: 0.45rem 0.85rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.875rem;
+    color: #1e2420;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.date-row input[type="date"]:focus { border-color: #3d5a3e; }
+
+/* ── Buttons ── */
+.btn-primary {
+    background: #3d5a3e;
+    color: #f5f0e8;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1.2rem;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+.btn-primary:hover  { background: #5a7f5b; }
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-ghost {
+    background: transparent;
+    color: #3d5a3e;
+    border: 1.5px solid #3d5a3e;
+    border-radius: 8px;
+    padding: 0.45rem 1rem;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.btn-ghost:hover { background: #3d5a3e; color: #f5f0e88f; }
+
+/* ── Toggle group ── */
+.toggle-group {
+    display: inline-flex;
+    border: 1.5px solid #3d5a3e;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.toggle-group button {
+    background: transparent;
+    border: none;
+    padding: 0.4rem 1rem;
+    font-family: 'Sora', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #3d5a3e;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.toggle-group button + button { border-left: 1.5px solid #3d5a3e; }
+.toggle-group button.active { background: #3d5a3e; color: #f5f0e8; }
+
+/* ── Table ── */
+.data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+
+.data-table thead th {
+    background: #1e2420;
+    color: #c9b99a;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    position: sticky;
+    top: 0; 
+    z-index: 2; 
+}
+.data-table thead th:first-child { border-radius: 10px 0 0 0; }
+.data-table thead th:last-child  { border-radius: 0 10px 0 0; }
+.data-table tbody tr {
+    border-bottom: 1px solid #e2d5c0;
+    transition: background 0.15s;
+}
+.data-table tbody tr:nth-child(even) { background: #ede5d5; }
+.data-table tbody tr:hover           { background: #d8ccb8; }
+.data-table tbody td {
+    padding: 0.65rem 1rem;
+    font-size: 0.75rem;
+    font-family: 'DM Mono', monospace;
+    color: #1e2420;
+    white-space: nowrap;
+}
+
+.data-table thead th { white-space: nowrap; }
+
+.data-table .name_field {
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 40vw;
+    min-width: 100px;
+}
+
+/* category badge */
+.badge {
+    display: inline-block;
+    padding: 0.15rem 0.6rem;
+    border-radius: 99px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: #3d5a3e22;
+    color: #3d5a3e;
+}
+
+/* ── Card ── */
+.card {
+    background: #fff;
+    border: 1px solid #e2d5c0;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(30,36,32,0.06);
+}
+
+/* Table card stretches to match chart card height in the 2-column grid */
+.card-table {
+    display: flex;
+    flex-direction: column;
+}
+.card-table .table-scroll {
+    flex: 1;
+    min-height: 0;
+}
+
+/* ── Chart canvas ── */
+.chart-area {
+    position: relative;
+    height: 640px;
+}
+
+/* scrollable table body */
+.table-scroll { max-height: 880px; overflow-y: auto; overflow-x: auto; }
+
+/* global scrollbar style */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: #c9b99a; border-radius: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Tab bar styles */
+.tab.active {
+    background-color: #3d5a3e;
+    color: #f5f0e8;
+}
+
+.reweTimeChart{
+    color: rgb(7, 7, 5)
+}
+
+/* ── Type manager popup ── */
+.type-manager-row th,
+.type-manager-row td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #e2d5c0;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    text-align: left;
+    color: #1e2420;
+}
+
+.type-select {
+    background: #f5f0e8;
+    border: 1.5px solid #c9b99a;
+    border-radius: 6px;
+    padding: 0.3rem 0.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: #1e2420;
+    cursor: pointer;
+    width: 100%;
+}
+.type-select:focus {
+    outline: none;
+    border-color: #3d5a3e;
+}
+
+/* ── Bar chart HTML legend ── */
+.bar-legend-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.35rem 0.75rem;
+    padding: 0.75rem 0.5rem 0.25rem;
+}
+.bar-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: #1e2420;
+    overflow: hidden;
+}
+.bar-legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* ── Mobile overrides ── */
+@media (max-width: 640px) {
+    .data-table td,
+    .data-table thead th { padding-left: 0.5rem; padding-right: 0.5rem; }
+
+    main { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+}
+
+/* *, ::after, ::before { width: inherit; } */

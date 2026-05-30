@@ -1,6 +1,7 @@
 package com.example.expenditure.model
 
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 
 enum class ExpenseType(val value: String, val position: Int) {
     ESSENTIAL("Essential", 0),
@@ -33,7 +34,7 @@ class BankDbEntry(
 }
 
 data class ReweExpenditureOutput(
-    val date: LocalDate,
+    val date: LocalDateTime,
     val name: String,
     val amount: Long,
     val price: Double,
@@ -73,7 +74,7 @@ data class BankExpenditureEntry(
 ) : DisplayNameTarget
 
 data class ReweExpenditureEntry(
-    val date: LocalDate?,
+    val date: LocalDateTime?,
     val name: String?,
     val amount: Int,
     val price: Double,

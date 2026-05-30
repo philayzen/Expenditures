@@ -1,7 +1,8 @@
 import kotlinx.datetime.LocalDate;
+import kotlinx.datetime.LocalDateTime;
 
 CREATE TABLE rewe_expenditures (
-    date         TEXT AS LocalDate NOT NULL,
+    date         TEXT AS LocalDateTime NOT NULL,
     amount       INTEGER NOT NULL,
     name         TEXT NOT NULL,
     price        REAL NOT NULL,

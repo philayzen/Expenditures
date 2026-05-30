@@ -1,47 +1,61 @@
 package com.example.expenditure
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.resources.painterResource
+import androidx.compose.ui.unit.dp
+import com.example.expenditure.analysis.ExpenditureAnalysis
+import com.example.expenditure.db.ExpenditureRepository
+import com.example.expenditure.ui.BankTable
+import com.example.expenditure.ui.ExpenditureViewModel
+import com.example.expenditure.ui.ReweTable
+import com.example.expenditure.ui.theme.ExpenditureTheme
 
-import expenditure.shared.generated.resources.Res
-import expenditure.shared.generated.resources.compose_multiplatform
+private enum class Tabs(val label: String) { BANK("Banks"), REWE("Rewe") }
 
 @Composable
-@Preview
-fun App() {
-    MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
+fun App(repository: ExpenditureRepository) {
+    ExpenditureTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            val viewModel = remember { ExpenditureViewModel(ExpenditureAnalysis(repository)) }
+            LaunchedEffect(Unit) {
+                viewModel.loadRewe()
+                viewModel.loadBank()
             }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+
+            var selectedTab by remember { mutableStateOf(Tabs.REWE) }
+
+            Column(Modifier.fillMaxSize().safeContentPadding()) {
+                Text(
+                    text = "Expenditure tracker",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(16.dp),
+                )
+                TabRow(selectedTabIndex = selectedTab.ordinal) {
+                    Tabs.entries.forEach { tab ->
+                        Tab(
+                            selected = selectedTab == tab,
+                            onClick = { selectedTab = tab },
+                            text = { Text(tab.label) },
+                        )
+                    }
+                }
+                when (selectedTab) {
+                    Tabs.REWE -> ReweTable(viewModel, Modifier.fillMaxSize())
+                    Tabs.BANK -> BankTable(viewModel, Modifier.fillMaxSize())
                 }
             }
         }

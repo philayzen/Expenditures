@@ -12,6 +12,8 @@ import com.example.expenditure.model.NameReferenceOutput
 import com.example.expenditure.model.ReweExpenditureEntry
 import com.example.expenditure.model.ReweExpenditureOutput
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.atTime
 
 class ExpenditureRepository(database: ExpenditureDatabase) {
     private val queries = database.expendituresQueries
@@ -31,7 +33,8 @@ class ExpenditureRepository(database: ExpenditureDatabase) {
         since: LocalDate? = null,
         until: LocalDate? = null,
     ): List<ReweExpenditureOutput> =
-        queries.selectReweExpenditures(since, until) {
+        // REWE dates carry a time-of-day; widen the calendar-day filter to cover the whole day.
+        queries.selectReweExpenditures(since?.atTime(0, 0), until?.atTime(23, 59, 59)) {
                 date, name, amount, price, category, displayName ->
             ReweExpenditureOutput(date, name, amount, price, category, displayName)
         }.executeAsList()
@@ -52,12 +55,17 @@ class ExpenditureRepository(database: ExpenditureDatabase) {
         }
     }
 
-    fun insertReweExpenditure(date: LocalDate, items: List<Item>) {
-        if (queries.countReweByDate(date).executeAsOne() != 0L) return
+    /** Convenience for callers that only have a calendar day; stored at midnight. */
+    fun insertReweExpenditure(date: LocalDate, items: List<Item>) =
+        insertReweExpenditure(date.atTime(0, 0), items)
+
+    fun insertReweExpenditure(dateTime: LocalDateTime, items: List<Item>) {
+        // Each receipt has a unique timestamp, so this skips re-importing that exact receipt only.
+        if (queries.countReweByDate(dateTime).executeAsOne() != 0L) return
         queries.transaction {
             items.forEach { item ->
                 queries.insertReweExpenditure(
-                    date = date,
+                    date = dateTime,
                     amount = item.amount.toLong(),
                     name = requireNotNull(item.name) { "Item.name is required to insert" },
                     price = item.price,

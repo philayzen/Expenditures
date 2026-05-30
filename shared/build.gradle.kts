@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -19,16 +18,7 @@ sqldelight {
 
 kotlin {
     jvm()
-    
-    js {
-        browser()
-    }
-    
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-    }
-    
+
     androidLibrary {
        namespace = "com.example.expenditure.shared"
        compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -62,6 +52,7 @@ kotlin {
             implementation(libs.sqldelight.runtime)
             implementation(libs.sqldelight.coroutines.extensions)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.vico.multiplatform)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -69,9 +60,6 @@ kotlin {
         jvmMain.dependencies {
             implementation(libs.sqldelight.sqlite.driver)
             implementation(libs.pdfbox)
-        }
-        jsMain.dependencies {
-            implementation(libs.wrappers.browser)
         }
     }
 }

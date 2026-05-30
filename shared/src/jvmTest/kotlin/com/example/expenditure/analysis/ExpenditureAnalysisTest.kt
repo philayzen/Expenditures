@@ -3,6 +3,7 @@ package com.example.expenditure.analysis
 import com.example.expenditure.model.BankDbEntry
 import com.example.expenditure.model.ReweExpenditureOutput
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.atTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -30,7 +31,7 @@ class ExpenditureAnalysisTest {
         category: String? = null,
         displayName: String? = null,
     ) = ReweExpenditureOutput(
-        date = date("2024-01-01"), name = name, amount = amount,
+        date = date("2024-01-01").atTime(0, 0), name = name, amount = amount,
         price = price, category = category, displayName = displayName,
     )
 

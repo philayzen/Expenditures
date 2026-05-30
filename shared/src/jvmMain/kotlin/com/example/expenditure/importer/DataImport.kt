@@ -34,7 +34,7 @@ class DataImport(private val repository: ExpenditureRepository) {
     fun insertReweReceipt(receipt: ParsedReceipt) {
         val cats = repository.getReweMostCommonCategories(receipt.items.mapNotNull { it.name })
         val items = receipt.items.map { if (it.name in cats) it.copy(category = cats[it.name]) else it }
-        repository.insertReweExpenditure(parseReceiptDate(receipt.date), items)
+        repository.insertReweExpenditure(parseReceiptDateTime(receipt.date), items)
     }
 
     fun insertBanking(entries: List<BankDbEntry>) {

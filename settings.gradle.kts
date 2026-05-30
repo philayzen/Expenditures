@@ -35,4 +35,5 @@ plugins {
 include(":androidApp")
 include(":desktopApp")
 include(":shared")
-include(":webApp")
+// Web support is dropped for now; module kept on disk but excluded from the build.
+// include(":webApp")

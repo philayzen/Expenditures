@@ -10,6 +10,7 @@ import com.example.expenditure.model.ExpenseType
 import com.example.expenditure.model.Item
 import com.example.expenditure.model.ReweExpenditureEntry
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.atTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -99,7 +100,7 @@ class ExpenditureDatabaseTest {
             for (item in case.items) {
                 val name = item.name!!
                 val present = rows.any {
-                    it.date == d && it.name == name && it.amount == item.amount.toLong() && it.price == item.price
+                    it.date.date == d && it.name == name && it.amount == item.amount.toLong() && it.price == item.price
                 }
                 // a duplicate name within the batch is ignored by the PK; the original stays
                 if (name !in seen) assertTrue(present, "expected $name to be present")
@@ -159,7 +160,7 @@ class ExpenditureDatabaseTest {
     fun updateDisplayNamesReweByName() = env().use { e ->
         seedBioMilch(e)
         val entry = ReweExpenditureEntry(
-            date = date("2024-01-01"), name = "BIO MILCH A", amount = 2, price = 1.5,
+            date = date("2024-01-01").atTime(0, 0), name = "BIO MILCH A", amount = 2, price = 1.5,
             category = "Dairy", displayName = "BIO MILCH A",
         )
         e.repo.updateDisplayNames(listOf(entry), "Milk")

@@ -27,7 +27,7 @@ class DataImportTest {
 
         val rows = repository.getReweExpenditures()
         assertEquals(13, rows.size)
-        assertEquals(setOf(LocalDate(2026, 2, 2)), rows.map { it.date }.toSet())
+        assertEquals(setOf(LocalDate(2026, 2, 2)), rows.map { it.date.date }.toSet())
 
         val byName = rows.associate { it.name to (it.amount to it.price) }
         val expected = mapOf(

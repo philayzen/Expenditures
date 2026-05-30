@@ -2,22 +2,30 @@ package com.example.expenditure.importer
 
 import com.example.expenditure.model.Item
 import kotlin.math.abs
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.atTime
 
-/** Date is kept as the raw string extracted from the receipt (format varies by source). */
+/** Date is kept as the raw timestamp string extracted from the receipt (format varies by source). */
 data class ParsedReceipt(val date: String, val items: List<Item>)
 
 /**
- * Normalizes a raw receipt date to [LocalDate]. Receipts carry either `dd.MM.yyyy` (TSE-Start line)
- * or an ISO timestamp like `2026-02-02T14:29:13.000`; both are reduced to a calendar date.
+ * Normalizes a raw receipt timestamp to [LocalDateTime], preserving the time of day so two trips on
+ * the same calendar day stay distinct. Receipts carry either `dd.MM.yyyy[ HH:mm:ss]` (TSE-Start line)
+ * or an ISO timestamp like `2026-02-02T14:29:13.000`.
  */
-fun parseReceiptDate(raw: String): LocalDate {
+fun parseReceiptDateTime(raw: String): LocalDateTime {
     val value = raw.trim()
-    return if (value.contains('.') && !value.contains('-')) {
-        parseGermanDate(value)
-    } else {
-        LocalDate.parse(value.take(10))
-    }
+    // ISO timestamp (already a LocalDateTime); accepts an optional fractional-seconds suffix.
+    if (value.contains('T')) return LocalDateTime.parse(value)
+    // German "dd.MM.yyyy" optionally followed by a "HH:mm:ss" clock time.
+    val parts = value.split(" ")
+    val date = parseGermanDate(parts[0])
+    val time = parts.getOrNull(1)?.split(":").orEmpty()
+    return date.atTime(
+        hour = time.getOrNull(0)?.toInt() ?: 0,
+        minute = time.getOrNull(1)?.toInt() ?: 0,
+        second = time.getOrNull(2)?.toInt() ?: 0,
+    )
 }
 
 /**
@@ -39,7 +47,11 @@ object ReweReceiptParser {
         val lines = text.split("\n").map { it.trim() }
 
         val dateLine = lines.firstOrNull { it.contains(tseStart) } ?: return null
-        val date = spaces.split(dateLine).getOrNull(1) ?: return null
+        // TSE-Start carries "<date> <time>" (e.g. "01.01.2024 10:00:00"); keep both for a unique timestamp.
+        val dateTokens = spaces.split(dateLine)
+        val datePart = dateTokens.getOrNull(1) ?: return null
+        val timePart = dateTokens.getOrNull(2)
+        val date = if (timePart != null) "$datePart $timePart" else datePart
 
         val eurIndex = lines.indexOfFirst { eurLine.containsMatchIn(it) }
         val start = if (eurIndex >= 0) {

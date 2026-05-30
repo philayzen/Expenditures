@@ -1,0 +1,127 @@
+import kotlinx.datetime.LocalDate;
+
+CREATE TABLE rewe_expenditures (
+    date         TEXT AS LocalDate NOT NULL,
+    amount       INTEGER NOT NULL,
+    name         TEXT NOT NULL,
+    price        REAL NOT NULL,
+    category     TEXT DEFAULT '',
+    display_name TEXT DEFAULT '',
+    PRIMARY KEY (date, name)
+);
+
+CREATE TABLE general_expenditures (
+    key_helper   INTEGER NOT NULL,
+    date         TEXT AS LocalDate NOT NULL,
+    source       TEXT NOT NULL,
+    recipient    TEXT NOT NULL,
+    purpose      TEXT,
+    price        REAL NOT NULL,
+    category     TEXT DEFAULT '',
+    display_name TEXT DEFAULT '',
+    PRIMARY KEY (key_helper, date, source, recipient)
+);
+
+CREATE TABLE category_types (
+    category     TEXT NOT NULL,
+    expense_type TEXT NOT NULL DEFAULT 'Unassigned',
+    PRIMARY KEY (category)
+);
+
+-- == general_expenditures ==
+
+insertGeneralExpenditure:
+INSERT OR IGNORE INTO general_expenditures (key_helper, date, source, recipient, purpose, price, category)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+selectGeneralExpenditures:
+SELECT key_helper, date, source, recipient, price, purpose, category, display_name
+FROM general_expenditures
+WHERE (:since IS NULL OR date >= :since)
+  AND (:until IS NULL OR date <= :until)
+ORDER BY date DESC;
+
+updateBankCategory:
+UPDATE general_expenditures SET category = :category WHERE recipient = :recipient;
+
+updateBankDisplayNameByPk:
+UPDATE general_expenditures SET display_name = :displayName
+WHERE key_helper = :keyHelper AND date = :date AND source = :source AND recipient = :recipient;
+
+updateBankDisplayNameByAltNames:
+UPDATE general_expenditures SET display_name = :displayName
+WHERE recipient IN :altNames AND category = :category;
+
+updateBankDisplayNameByRecipient:
+UPDATE general_expenditures SET display_name = :displayName WHERE recipient = :recipient;
+
+selectBankNameReferences:
+SELECT recipient, display_name FROM general_expenditures
+WHERE recipient IN :names AND display_name <> '';
+
+selectBankOriginalNames:
+SELECT recipient FROM general_expenditures WHERE display_name = :reference;
+
+selectBankMostCommonCategories:
+SELECT recipient, category FROM general_expenditures
+WHERE recipient IN :names
+GROUP BY recipient, category
+ORDER BY COUNT(*) DESC;
+
+selectDistinctBankCategories:
+SELECT DISTINCT category FROM general_expenditures WHERE category != '';
+
+-- == rewe_expenditures ==
+
+countReweByDate:
+SELECT COUNT(*) FROM rewe_expenditures WHERE date = :date;
+
+insertReweExpenditure:
+INSERT OR IGNORE INTO rewe_expenditures (date, amount, name, price, category)
+VALUES (?, ?, ?, ?, ?);
+
+selectReweExpenditures:
+SELECT date, name, amount, price, category, display_name
+FROM rewe_expenditures
+WHERE (:since IS NULL OR date >= :since)
+  AND (:until IS NULL OR date <= :until)
+ORDER BY date DESC;
+
+updateReweCategory:
+UPDATE rewe_expenditures SET category = :category WHERE name = :name;
+
+updateReweDisplayNameByName:
+UPDATE rewe_expenditures SET display_name = :displayName WHERE name = :name;
+
+updateReweDisplayNameByAltNames:
+UPDATE rewe_expenditures SET display_name = :displayName WHERE name IN :altNames;
+
+selectReweNameReferences:
+SELECT name, display_name FROM rewe_expenditures
+WHERE name IN :names AND display_name <> '';
+
+selectReweOriginalNames:
+SELECT name FROM rewe_expenditures WHERE display_name = :reference;
+
+selectReweMostCommonCategories:
+SELECT name, category FROM rewe_expenditures
+WHERE name IN :names
+GROUP BY name, category
+ORDER BY COUNT(*) DESC;
+
+-- == category_types ==
+
+selectCategoryTypes:
+SELECT category, expense_type FROM category_types;
+
+selectCategoryTypeCategories:
+SELECT category FROM category_types;
+
+upsertCategoryType:
+INSERT OR REPLACE INTO category_types (category, expense_type) VALUES (:category, :expenseType);
+
+insertCategoryType:
+INSERT INTO category_types (category, expense_type) VALUES (:category, :expenseType);
+
+deleteCategoryType:
+DELETE FROM category_types WHERE category = :category;

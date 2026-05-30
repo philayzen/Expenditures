@@ -4,6 +4,7 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.example.expenditure.model.BankDbEntry
 import com.example.expenditure.model.BankExpenditureEntry
+import com.example.expenditure.model.CategoryTarget
 import com.example.expenditure.model.CategoryUpdate
 import com.example.expenditure.model.ExpenseType
 import com.example.expenditure.model.Item
@@ -512,5 +513,41 @@ class ExpenditureDatabaseTest {
     fun syncBankCategoryTypesHandlesEmptyDb() = env().use { e ->
         e.repo.syncBankCategoryTypes()
         assertEquals(emptyList(), e.repo.getCategoryTypes())
+    }
+
+    // == update_categories (app.py orchestration) ==
+
+    @Test
+    fun updateCategoriesReweUpdatesByName() = env().use { e ->
+        e.repo.insertReweExpenditure(date("2024-01-01"), listOf(Item(2, "Milk", 1.5, "", "Milk")))
+        e.repo.updateCategories(CategoryTarget.REWE, listOf(CategoryUpdate("Milk", "Dairy")))
+        val stored = e.q.selectReweExpenditures(null, null).executeAsList().first { it.name == "Milk" }.category
+        assertEquals("Dairy", stored)
+    }
+
+    @Test
+    fun updateCategoriesReweExpandsViaDisplayName() = env().use { e ->
+        e.repo.insertReweExpenditure(
+            date("2024-01-01"),
+            listOf(Item(1, "AMAZON.DE", 10.0, ""), Item(1, "AMAZON GMBH", 20.0, "")),
+        )
+        e.q.updateReweDisplayNameByName("Amazon", "AMAZON.DE")
+        e.q.updateReweDisplayNameByName("Amazon", "AMAZON GMBH")
+        e.repo.updateCategories(CategoryTarget.REWE, listOf(CategoryUpdate("Amazon", "Shopping")))
+        val stored = e.q.selectReweExpenditures(null, null).executeAsList()
+            .filter { it.name in setOf("AMAZON.DE", "AMAZON GMBH") }.map { it.category }.toSet()
+        assertEquals(setOf("Shopping"), stored)
+    }
+
+    @Test
+    fun updateCategoriesBankUpdatesAndSyncsTypes() = env().use { e ->
+        e.repo.insertGeneralExpenditure(listOf(BankDbEntry(1, date("2024-01-01"), "Me", "Amazon", 50.0, "test")))
+        e.repo.updateCategories(CategoryTarget.BANK, listOf(CategoryUpdate("Amazon", "Shopping")))
+        val stored = e.q.selectGeneralExpenditures(null, null).executeAsList().first { it.recipient == "Amazon" }.category
+        assertEquals("Shopping", stored)
+        assertEquals(
+            setOf("Shopping" to ExpenseType.UNASSIGNED.value),
+            e.repo.getCategoryTypes().map { it.category to it.expenseType }.toSet(),
+        )
     }
 }

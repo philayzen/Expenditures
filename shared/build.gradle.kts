@@ -68,6 +68,7 @@ kotlin {
         }
         jvmMain.dependencies {
             implementation(libs.sqldelight.sqlite.driver)
+            implementation(libs.pdfbox)
         }
         jsMain.dependencies {
             implementation(libs.wrappers.browser)

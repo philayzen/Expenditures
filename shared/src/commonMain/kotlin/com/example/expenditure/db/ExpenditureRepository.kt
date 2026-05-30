@@ -2,6 +2,7 @@ package com.example.expenditure.db
 
 import com.example.expenditure.model.BankDbEntry
 import com.example.expenditure.model.BankExpenditureEntry
+import com.example.expenditure.model.CategoryTarget
 import com.example.expenditure.model.CategoryTypeEntry
 import com.example.expenditure.model.CategoryUpdate
 import com.example.expenditure.model.DisplayNameTarget
@@ -119,6 +120,24 @@ class ExpenditureRepository(database: ExpenditureDatabase) {
         val results = queries.selectReweOriginalNames(reference).executeAsList() +
             queries.selectBankOriginalNames(reference).executeAsList()
         return results.ifEmpty { listOf(reference) }
+    }
+
+    /**
+     * Expands each entry's display name back to its original DB names, then applies the category to
+     * all of them. Mirrors `app.py`'s `/update_categories`: the bank path additionally syncs
+     * category types so newly introduced categories get an [ExpenseType] row.
+     */
+    fun updateCategories(target: CategoryTarget, data: List<CategoryUpdate>) {
+        val transformed = data.flatMap { entry ->
+            getOriginalNames(entry.name).map { CategoryUpdate(it, entry.category) }
+        }
+        when (target) {
+            CategoryTarget.REWE -> updateReweCategoriesInDb(transformed)
+            CategoryTarget.BANK -> {
+                updateBankCategoriesInDb(transformed)
+                syncBankCategoryTypes()
+            }
+        }
     }
 
     fun updateReweCategoriesInDb(data: List<CategoryUpdate>) {

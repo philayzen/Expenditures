@@ -271,4 +271,52 @@ class ExpenditureAnalysisTest {
         assertEquals(2.0, result[0].price, 1e-9)
         assertEquals(1.5, result[1].price, 1e-9)
     }
+
+    // == resolveReweIndividually ==
+
+    @Test
+    fun reweIndividuallyReturnsResolvedRows() {
+        val result = resolveReweIndividually(listOf(rewe(name = "Milk", amount = 2, price = 1.5, category = "Dairy")))
+        assertEquals(1, result.size)
+        assertEquals("Milk", result[0].name)
+        assertEquals(2, result[0].amount)
+        assertEquals(1.5, result[0].price, 1e-9)
+        assertEquals("Dairy", result[0].category)
+        assertEquals("Milk", result[0].displayName)
+    }
+
+    @Test
+    fun reweIndividuallyAppliesDisplayName() {
+        val result = resolveReweIndividually(listOf(
+            rewe(name = "BIO MILCH", amount = 1, price = 1.5, category = "", displayName = "Milk"),
+        ))
+        assertEquals("Milk", result[0].displayName)
+    }
+
+    @Test
+    fun reweIndividuallyEmptyReturnsEmpty() {
+        assertEquals(emptyList(), resolveReweIndividually(emptyList()))
+    }
+
+    // == resolveGeneralIndividually ==
+
+    @Test
+    fun generalIndividuallyReturnsResolvedRows() {
+        val result = resolveGeneralIndividually(listOf(
+            bank(recipient = "Amazon", price = 50.0, purpose = "Cheap iPhone", category = "Shopping"),
+        ))
+        assertEquals(1, result.size)
+        assertEquals("Me", result[0].source)
+        assertEquals(50.0, result[0].price, 1e-9)
+        assertEquals("Amazon", result[0].displayName)
+        assertEquals("Cheap iPhone", result[0].purpose)
+    }
+
+    @Test
+    fun generalIndividuallyAppliesDisplayName() {
+        val result = resolveGeneralIndividually(listOf(
+            bank(recipient = "AMAZON.DE GMBH", price = 50.0, category = "", displayName = "Amazon"),
+        ))
+        assertEquals("Amazon", result[0].displayName)
+    }
 }

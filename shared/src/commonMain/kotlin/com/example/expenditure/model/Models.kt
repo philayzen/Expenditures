@@ -27,6 +27,9 @@ class BankDbEntry(
     val displayName: String? = null,
 ) {
     val recipient: String = if (recipient.isNotEmpty()) recipient else source
+
+    fun withCategory(category: String?): BankDbEntry =
+        BankDbEntry(keyHelper, date, source, recipient, price, purpose, category, displayName)
 }
 
 data class ReweExpenditureOutput(
@@ -84,6 +87,9 @@ data class CategoryUpdate(
     val name: String,
     val category: String,
 )
+
+/** Selects which table [com.example.expenditure.db.ExpenditureRepository.updateCategories] writes to. */
+enum class CategoryTarget { REWE, BANK }
 
 data class BankCategoryEntry(
     val category: String?,

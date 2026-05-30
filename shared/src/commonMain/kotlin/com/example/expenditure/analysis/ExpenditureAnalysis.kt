@@ -6,6 +6,7 @@ import com.example.expenditure.model.BankDbEntry
 import com.example.expenditure.model.BankExpenditureEntry
 import com.example.expenditure.model.Item
 import com.example.expenditure.model.ReweCategoryEntry
+import com.example.expenditure.model.ReweExpenditureEntry
 import com.example.expenditure.model.ReweExpenditureOutput
 import kotlin.math.round
 import kotlinx.datetime.LocalDate
@@ -45,6 +46,23 @@ private class ReweAcc(
         displayName = displayName, altNames = altNames,
     )
 }
+
+/** Per-row view with the display-name fallback resolved. Mirrors `app.py`'s `*_individually` routes. */
+internal fun resolveReweIndividually(rows: List<ReweExpenditureOutput>): List<ReweExpenditureEntry> =
+    rows.map { e ->
+        ReweExpenditureEntry(
+            date = e.date, name = e.name, amount = e.amount.toInt(), price = e.price,
+            category = e.category, displayName = reweNameRef(e),
+        )
+    }
+
+internal fun resolveGeneralIndividually(rows: List<BankDbEntry>): List<BankExpenditureEntry> =
+    rows.map { e ->
+        BankExpenditureEntry(
+            keyHelper = e.keyHelper, date = e.date, source = e.source, recipient = e.recipient,
+            price = e.price, purpose = e.purpose, category = e.category, displayName = bankNameRef(e),
+        )
+    }
 
 internal fun groupGeneralByName(expenditures: List<BankDbEntry>): List<BankExpenditureEntry> {
     val acc = LinkedHashMap<String, BankAcc>()
@@ -148,6 +166,12 @@ internal fun groupReweByCategory(expenditures: List<ReweExpenditureOutput>): Lis
 
 /** Mirrors the module-level grouping API of `script.py`, fetching via the repository then grouping. */
 class ExpenditureAnalysis(private val repository: ExpenditureRepository) {
+    fun reweIndividually(since: LocalDate? = null, until: LocalDate? = null): List<ReweExpenditureEntry> =
+        resolveReweIndividually(repository.getReweExpenditures(since, until))
+
+    fun generalIndividually(since: LocalDate? = null, until: LocalDate? = null): List<BankExpenditureEntry> =
+        resolveGeneralIndividually(repository.getGeneralExpenditures(since, until))
+
     fun generalGroupedByName(since: LocalDate? = null, until: LocalDate? = null): List<BankExpenditureEntry> =
         groupGeneralByName(repository.getGeneralExpenditures(since, until))
 

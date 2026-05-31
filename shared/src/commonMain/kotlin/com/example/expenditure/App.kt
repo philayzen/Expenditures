@@ -2,6 +2,7 @@ package com.example.expenditure
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.MaterialTheme
@@ -20,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import com.example.expenditure.analysis.ExpenditureAnalysis
 import com.example.expenditure.db.ExpenditureRepository
 import com.example.expenditure.ui.BankTable
+import com.example.expenditure.ui.DateFilterBar
+import com.example.expenditure.ui.TypeManagerDialog
 import com.example.expenditure.ui.ExpenditureViewModel
 import com.example.expenditure.ui.ReweTable
 import com.example.expenditure.ui.theme.ExpenditureTheme
@@ -36,7 +39,20 @@ fun App(repository: ExpenditureRepository) {
                 viewModel.loadBank()
             }
 
-            var selectedTab by remember { mutableStateOf(Tabs.REWE) }
+            var selectedTab by remember { mutableStateOf(Tabs.BANK) }
+
+            // Popup visibility is hoisted into the ViewModel so the trigger button (now in the
+            // table pane) and this dialog can live in separate composables.
+            if (viewModel.showTypeManager) {
+                TypeManagerDialog(
+                    categoryTypes = viewModel.categoryTypes,
+                    onDismiss = { viewModel.dismissTypeManager() },
+                    onSave = { edits ->
+                        viewModel.saveCategoryTypes(edits)
+                        viewModel.dismissTypeManager()
+                    },
+                )
+            }
 
             Column(Modifier.fillMaxSize().safeContentPadding()) {
                 Text(
@@ -44,6 +60,7 @@ fun App(repository: ExpenditureRepository) {
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(16.dp),
                 )
+                DateFilterBar(viewModel, Modifier.fillMaxWidth())
                 TabRow(selectedTabIndex = selectedTab.ordinal) {
                     Tabs.entries.forEach { tab ->
                         Tab(

@@ -20,3 +20,4 @@ node_modules/
 .claude/
 *.db
 *.bak
+banking_analysis

@@ -25,7 +25,7 @@ class ExpenditureRepository(database: ExpenditureDatabase) {
     ): List<BankDbEntry> =
         queries.selectGeneralExpenditures(since, until) {
                 keyHelper, date, source, recipient, price, purpose, category, displayName ->
-            BankDbEntry(keyHelper, date, source, recipient, -price, purpose, category, displayName)
+            BankDbEntry(keyHelper, date, source, recipient, -price / 100, purpose, category, displayName)
         }.executeAsList()
             .filter { it.recipient !in bankIgnore }
 
@@ -36,7 +36,7 @@ class ExpenditureRepository(database: ExpenditureDatabase) {
         // REWE dates carry a time-of-day; widen the calendar-day filter to cover the whole day.
         queries.selectReweExpenditures(since?.atTime(0, 0), until?.atTime(23, 59, 59)) {
                 date, name, amount, price, category, displayName ->
-            ReweExpenditureOutput(date, name, amount, price, category, displayName)
+            ReweExpenditureOutput(date, name, amount, price / 100, category, displayName)
         }.executeAsList()
 
     fun insertGeneralExpenditure(data: List<BankDbEntry>) {
@@ -48,7 +48,7 @@ class ExpenditureRepository(database: ExpenditureDatabase) {
                     source = row.source,
                     recipient = row.recipient,
                     purpose = row.purpose,
-                    price = row.price,
+                    price = row.price * 100,
                     category = row.category,
                 )
             }
@@ -68,7 +68,7 @@ class ExpenditureRepository(database: ExpenditureDatabase) {
                     date = dateTime,
                     amount = item.amount.toLong(),
                     name = requireNotNull(item.name) { "Item.name is required to insert" },
-                    price = item.price,
+                    price = item.price * 100,
                     category = item.category,
                 )
             }

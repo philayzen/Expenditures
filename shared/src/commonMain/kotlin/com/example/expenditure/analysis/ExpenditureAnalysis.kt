@@ -4,6 +4,9 @@ import com.example.expenditure.db.ExpenditureRepository
 import com.example.expenditure.model.BankCategoryEntry
 import com.example.expenditure.model.BankDbEntry
 import com.example.expenditure.model.BankExpenditureEntry
+import com.example.expenditure.model.CategoryTarget
+import com.example.expenditure.model.CategoryTypeEntry
+import com.example.expenditure.model.CategoryUpdate
 import com.example.expenditure.model.Item
 import com.example.expenditure.model.ReweCategoryEntry
 import com.example.expenditure.model.ReweExpenditureEntry
@@ -189,4 +192,27 @@ class ExpenditureAnalysis(private val repository: ExpenditureRepository) {
 
     fun reweGroupedByCategory(since: LocalDate? = null, until: LocalDate? = null): List<ReweCategoryEntry> =
         groupReweByCategory(repository.getReweExpenditures(since, until))
+
+    fun updateReweCategories(data: List<CategoryUpdate>) =
+        repository.updateCategories(CategoryTarget.REWE, data)
+
+    fun updateBankCategories(data: List<CategoryUpdate>) =
+        repository.updateCategories(CategoryTarget.BANK, data)
+
+    /** Updates the display name for every REWE/bank row whose original DB name matches [name]. */
+    fun updateDisplayNameByName(name: String, newDisplayName: String) =
+        repository.updateDisplayNameByName(name, newDisplayName)
+
+    /**
+     * Category→expense-type assignments for the type manager. Syncs first so every distinct bank
+     * category has a row (defaulting to Unassigned), mirroring the web's `sync_bank_category_types`.
+     */
+    fun categoryTypes(): List<CategoryTypeEntry> {
+        repository.syncBankCategoryTypes()
+        return repository.getCategoryTypes()
+    }
+
+    /** Persists category→expense-type assignments (mirrors `update_category_types`). */
+    fun updateCategoryTypes(data: List<Pair<String, String>>) =
+        repository.updateCategoryTypes(data)
 }

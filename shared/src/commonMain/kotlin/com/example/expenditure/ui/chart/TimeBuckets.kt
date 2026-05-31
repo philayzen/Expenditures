@@ -1,5 +1,6 @@
 package com.example.expenditure.ui.chart
 
+import com.example.expenditure.model.ExpenseType
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
@@ -89,6 +90,72 @@ fun barsFor(points: List<Pair<LocalDate, Double>>, since: LocalDate, until: Loca
     val (buckets, useMonths) = buildEmptyBuckets(since, until)
     assign(buckets, points, useMonths)
     return groupBuckets(buckets, useMonths, if (useMonths) 12 else 10)
+}
+
+// ── Stacked-by-expense-type variant (bank bar chart) ────────────────────────────
+
+/** A dated value tagged with its expense type, for the stacked bar chart. */
+data class TypedPoint(val date: LocalDate, val value: Double, val type: String)
+
+/** One stacked segment: an expense type and its per-bar totals (aligned with [StackedBarData.labels]). */
+data class BarSeries(val type: String, val values: List<Double>)
+
+/** Per-bar labels plus one [BarSeries] per expense type present, sorted by [ExpenseType.position]. */
+data class StackedBarData(val labels: List<String>, val series: List<BarSeries>) {
+    val isEmpty: Boolean get() = labels.isEmpty() || series.isEmpty()
+
+    companion object {
+        val EMPTY = StackedBarData(emptyList(), emptyList())
+    }
+}
+
+private fun typePosition(type: String): Int =
+    ExpenseType.entries.firstOrNull { it.value == type }?.position ?: Int.MAX_VALUE
+
+/**
+ * Stacked-bar port of `buildBarChart`'s `typeMap` branch in `js.js`. Buckets [points] by time the
+ * same way [barsFor] does, but keeps a per-expense-type running total per bucket, then groups each
+ * type's array down to the same bar count. Types with no positive total are dropped; the rest are
+ * ordered by [ExpenseType.position] so segment colours stay stable across reloads.
+ */
+fun stackedBarsFor(points: List<TypedPoint>, since: LocalDate, until: LocalDate): StackedBarData {
+    val (buckets, useMonths) = buildEmptyBuckets(since, until)
+    val maxBars = if (useMonths) 12 else 10
+
+    val typeTotals = LinkedHashMap<String, DoubleArray>()
+    for (p in points) {
+        val idx = if (useMonths) {
+            buckets.indexOfFirst { it.year == p.date.year && it.month == p.date.monthNumber }
+        } else {
+            buckets.indexOfFirst {
+                it.year == p.date.year && it.month == p.date.monthNumber && it.day == p.date.dayOfMonth
+            }
+        }
+        if (idx >= 0) {
+            buckets[idx].value += p.value
+            typeTotals.getOrPut(p.type) { DoubleArray(buckets.size) }[idx] += p.value
+        }
+    }
+
+    val labels = groupBuckets(buckets, useMonths, maxBars).map { it.label }
+    val groupSize = maxOf(1, ceil(buckets.size.toDouble() / maxBars).toInt())
+
+    val series = typeTotals.entries
+        .filter { entry -> entry.value.any { it > 0 } }
+        .sortedBy { typePosition(it.key) }
+        .map { (type, arr) ->
+            val grouped = mutableListOf<Double>()
+            var i = 0
+            while (i < arr.size) {
+                val end = minOf(i + groupSize, arr.size)
+                var sum = 0.0
+                for (k in i until end) sum += arr[k]
+                grouped.add(round(sum * 100) / 100)
+                i += groupSize
+            }
+            BarSeries(type, grouped)
+        }
+    return StackedBarData(labels, series)
 }
 
 private fun month(b: TimeBucket) = MONTHS[b.month - 1]
